@@ -134,4 +134,18 @@ function displayResults(results) {
       ${article.citations.length ? `
         <details><summary>Works Cited (${article.citations.length})</summary>
         <ul>
-          ${article.citations.map(cite => `<li><
+          ${article.citations.map(cite => `<li><a href="${cite}" target="_blank" rel="noopener noreferrer">${cite}</a></li>`).join("")}
+        </ul></details>` : ""}
+    `;
+    container.appendChild(card);
+  });
+}
+
+// 🔍 Enable Enter key to trigger search
+document.getElementById("searchInput").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    search();
+  }
+});
+
+// 🔍 Autofocus input on page load (already done by HTML autofocus attribute)
