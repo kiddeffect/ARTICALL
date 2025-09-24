@@ -3,21 +3,34 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Multi-Source Article Search</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>ARTICALL - Multi-Source Article Search</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="container">
-    <h1>Multi-Source Article Search</h1>
-    <input type="text" id="searchInput" placeholder="Search articles..." />
-    <div class="checkboxes">
-      <label><input type="checkbox" id="crossref" checked> Scholarly (CrossRef)</label>
-      <label><input type="checkbox" id="openalex" checked> Academic (OpenAlex)</label>
-      <label><input type="checkbox" id="searxng" checked> Web (SearXNG)</label>
-    </div>
-    <button onclick="search()">Search</button>
-    <div id="results"></div>
+
+  <!-- 🧠 Page Title -->
+  <header style="text-align: center; margin-bottom: 20px;">
+    <h1>ARTICALL</h1>
+    <p style="font-size: 1.2em; color: gray;">Multi-Source Article Search</p>
+  </header>
+
+  <!-- 🔍 Search Input -->
+  <div style="text-align: center; margin-bottom: 20px;">
+    <input type="text" id="searchInput" placeholder="Search articles..." style="width: 60%; padding: 10px; font-size: 16px;" />
+    <button onclick="search()" style="padding: 10px 20px; font-size: 16px;">Search</button>
   </div>
+
+  <!-- ✅ Search Filters -->
+  <div style="text-align: center; margin-bottom: 20px;">
+    <label><input type="checkbox" id="crossref" checked /> CrossRef</label>
+    <label><input type="checkbox" id="openalex" checked /> OpenAlex</label>
+    <label><input type="checkbox" id="searxng" checked /> SearXNG</label>
+  </div>
+
+  <!-- 📄 Search Results -->
+  <div id="results" style="width: 80%; margin: auto;"></div>
+
+  <!-- ⚙️ Script -->
   <script src="script.js"></script>
 </body>
 </html>
