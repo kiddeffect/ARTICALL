@@ -132,3 +132,8 @@ document.getElementById("searchInput").addEventListener("keydown", function(even
     search();
   }
 });
+// 🎯 Automatically focus the search input on page load
+window.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("searchInput").focus();
+});
+
