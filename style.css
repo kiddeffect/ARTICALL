@@ -11,6 +11,8 @@ body {
   color: #111;
   line-height: 1.5;
   padding: 20px;
+  min-height: 100vh;
+  position: relative;
 }
 
 .app-header {
@@ -55,6 +57,10 @@ body {
   border: 1px solid #ccc;
   border-right: none;
   border-radius: 6px 0 0 6px;
+  outline-offset: 2px;
+}
+.search-box input[type="text"]:focus {
+  outline: 2px solid #007bff;
 }
 .search-box button {
   padding: 10px 20px;
@@ -65,6 +71,7 @@ body {
   color: #fff;
   border-radius: 0 6px 6px 0;
   cursor: pointer;
+  transition: background-color 0.3s;
 }
 .search-box button:hover {
   background-color: #0056b3;
@@ -99,4 +106,59 @@ body {
 }
 details {
   margin-top: 12px;
+}
+
+/* 🌗 Theme Toggle Button */
+.theme-toggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: transparent;
+  border: 1px solid #ccc;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.3s;
+  z-index: 100;
+}
+.theme-toggle:hover {
+  background-color: #eee;
+}
+
+/* 🌙 Dark Theme */
+body.dark {
+  background-color: #1e1e1e;
+  color: #e0e0e0;
+}
+
+body.dark .app-header .subtitle {
+  color: #aaa;
+}
+
+body.dark input,
+body.dark button,
+body.dark .result,
+body.dark .theme-toggle {
+  background-color: #2a2a2a;
+  color: #e0e0e0;
+  border-color: #444;
+}
+
+body.dark .search-box input,
+body.dark .search-box button {
+  border-color: #444;
+}
+
+body.dark .search-box input:focus {
+  outline-color: #66aaff;
+}
+
+body.dark .result {
+  border-color: #333;
+  box-shadow: 0 1px 3px rgba(255, 255, 255, 0.05);
+}
+
+body.dark a {
+  color: #66b2ff;
 }
