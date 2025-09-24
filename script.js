@@ -148,4 +148,31 @@ document.getElementById("searchInput").addEventListener("keydown", (e) => {
   }
 });
 
-// 🔍 Autofocus input on page load (already done by HTML autofocus attribute)
+// 🌙 Dark mode toggle logic
+const themeToggle = document.getElementById('themeToggle');
+
+function setTheme(dark) {
+  if (dark) {
+    document.body.classList.add('dark');
+    themeToggle.textContent = '☀️ Light Mode';
+    localStorage.setItem('theme', 'dark');
+  } else {
+    document.body.classList.remove('dark');
+    themeToggle.textContent = '🌙 Dark Mode';
+    localStorage.setItem('theme', 'light');
+  }
+}
+
+// Initialize theme on page load
+const savedTheme = localStorage.getItem('theme');
+if (savedTheme === 'dark') {
+  setTheme(true);
+} else {
+  setTheme(false);
+}
+
+// Toggle on button click
+themeToggle.addEventListener('click', () => {
+  const isDark = document.body.classList.contains('dark');
+  setTheme(!isDark);
+});
