@@ -50,9 +50,29 @@ async function fetchOpenAlex(query) {
 // 🌐 Dynamic SearXNG search using searx.space live instance list
 async function fetchSearxng(query) {
   const resultsContainer = document.getElementById("results");
+  const fallbackInstances = [
+    "https://searx.be",           // may have issues, but a popular one
+    "https://search.sapti.me",    // example from user community
+    // add more that you’ve tested manually
+  ];
+
+  function timeoutFetch(url, timeout = 5000) {
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error("Timeout")), timeout);
+      fetch(url)
+        .then(res => {
+          clearTimeout(timer);
+          resolve(res);
+        })
+        .catch(err => {
+          clearTimeout(timer);
+          reject(err);
+        });
+    });
+  }
 
   try {
-    const res = await fetch("https://searx.space/data/instances.json");
+    const res = await timeoutFetch("https://searx.space/data/instances.json");
     const instanceData = await res.json();
 
     const instances = Object.entries(instanceData.instances)
@@ -61,19 +81,31 @@ async function fetchSearxng(query) {
         info.api &&
         info.api.v1 &&
         info.api.v1.get &&
-        !url.includes("localhost")
+        !url.includes("localhost") &&
+        url.startsWith("https://")
       )
       .map(([url]) => url.replace(/\/$/, ""));
 
-    for (let instance of instances) {
+    const allCandidates = [...instances, ...fallbackInstances];
+
+    for (let instance of allCandidates) {
       try {
+        const testUrl = `${instance}/search?q=test&format=json`;
+        const testRes = await timeoutFetch(testUrl);
+        if (!testRes.ok) throw new Error(`HTTP ${testRes.status}`);
+        const testData = await testRes.json();
+        if (!testData.results) throw new Error("No results field");
+        if (!Array.isArray(testData.results)) throw new Error("Results not array");
+
+        // If test passes, now do actual search
         const searchUrl = `${instance}/search?q=${encodeURIComponent(query)}&format=json`;
-        const response = await fetch(searchUrl);
-
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const data = await response.json();
-
-        if (!data.results || data.results.length === 0) continue;
+        const searchRes = await timeoutFetch(searchUrl);
+        if (!searchRes.ok) throw new Error(`Search HTTP ${searchRes.status}`);
+        const data = await searchRes.json();
+        if (!data.results || data.results.length === 0) {
+          console.warn(`Search pass but no results (empty) from instance: ${instance}`);
+          continue;
+        }
 
         const results = data.results.map(result => ({
           title: result.title,
@@ -86,10 +118,10 @@ async function fetchSearxng(query) {
         }));
 
         displayResults(results);
-        return; // ✅ Stop after successful instance
+        return; // stop after first working instance
       } catch (err) {
-        console.warn(`Skipping instance: ${instance}`, err.message);
-        continue;
+        console.warn(`Instance failed: ${instance}`, err.message);
+        // continue to next
       }
     }
 
@@ -100,6 +132,7 @@ async function fetchSearxng(query) {
     resultsContainer.innerHTML += `<p style="color:red">⚠️ Failed to load SearXNG instance list.</p>`;
   }
 }
+
 
 // 📋 Display results in the page
 function displayResults(results) {
