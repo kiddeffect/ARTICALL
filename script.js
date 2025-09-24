@@ -11,6 +11,7 @@ async function search() {
   if (useSearx) fetchSearxng(query);
 }
 
+// 📚 CrossRef scholarly search
 async function fetchCrossRef(query) {
   const res = await fetch(`https://api.crossref.org/works?query=${encodeURIComponent(query)}`);
   const data = await res.json();
@@ -27,6 +28,7 @@ async function fetchCrossRef(query) {
   displayResults(articles);
 }
 
+// 🎓 OpenAlex academic search
 async function fetchOpenAlex(query) {
   const res = await fetch(`https://api.openalex.org/works?search=${encodeURIComponent(query)}`);
   const data = await res.json();
@@ -43,22 +45,64 @@ async function fetchOpenAlex(query) {
   displayResults(articles);
 }
 
+// 🌐 Dynamic SearXNG search using searx.space live instance list
 async function fetchSearxng(query) {
-  const res = await fetch(`https://searx.be/search?q=${encodeURIComponent(query)}&format=json`);
-  const data = await res.json();
+  const resultsContainer = document.getElementById("results");
 
-  const results = data.results.map(result => ({
-    title: result.title,
-    author: null,
-    date: null,
-    source: "Web (SearXNG)",
-    link: result.url,
-    citations: []
-  }));
+  try {
+    // Step 1: Get live instance list from searx.space
+    const res = await fetch("https://searx.space/data/instances.json");
+    const instanceData = await res.json();
 
-  displayResults(results);
+    // Step 2: Filter valid instances
+    const instances = Object.entries(instanceData.instances)
+      .filter(([url, info]) =>
+        info.online &&
+        info.api &&
+        info.api.v1 &&
+        info.api.v1.get &&
+        !url.includes("localhost")
+      )
+      .map(([url]) => url.replace(/\/$/, ""));
+
+    // Step 3: Try instances until one works
+    for (let instance of instances) {
+      try {
+        const searchUrl = `${instance}/search?q=${encodeURIComponent(query)}&format=json`;
+        const response = await fetch(searchUrl);
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+
+        if (!data.results || data.results.length === 0) continue;
+
+        const results = data.results.map(result => ({
+          title: result.title,
+          author: null,
+          date: null,
+          source: `Web (${new URL(instance).hostname})`,
+          link: result.url,
+          citations: []
+        }));
+
+        displayResults(results);
+        return; // ✅ Stop after first working instance
+      } catch (err) {
+        console.warn(`Skipping instance: ${instance}`, err.message);
+        continue;
+      }
+    }
+
+    // ❌ No working instance
+    resultsContainer.innerHTML += `<p style="color:red">⚠️ No working SearXNG instances found.</p>`;
+
+  } catch (err) {
+    console.error("Failed to load searx.space instances:", err.message);
+    resultsContainer.innerHTML += `<p style="color:red">⚠️ Failed to load SearXNG instance list.</p>`;
+  }
 }
 
+// 📋 Display results in the page
 function displayResults(results) {
   const container = document.getElementById("results");
 
