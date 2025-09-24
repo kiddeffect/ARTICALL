@@ -20,13 +20,15 @@ async function fetchCrossRef(query) {
     title: item.title?.[0],
     author: item.author?.[0]?.family || "Unknown",
     date: item.published?.["date-parts"]?.[0]?.[0],
-    source: "CrossRef",
+    source: item.publisher || "Unknown",
     link: item.URL,
+    engine: "CrossRef",
     citations: []
   }));
 
   displayResults(articles);
 }
+
 
 // 🎓 OpenAlex academic search
 async function fetchOpenAlex(query) {
@@ -37,13 +39,15 @@ async function fetchOpenAlex(query) {
     title: item.title,
     author: item.authorships?.[0]?.author?.display_name || "Unknown",
     date: item.publication_date,
-    source: "OpenAlex",
-    link: item.id,
+    source: item.host_venue?.publisher || "Unknown",
+    link: item.primary_location?.source?.url || item.id,
+    engine: "OpenAlex",
     citations: item.referenced_works?.slice(0, 3) || []
   }));
 
   displayResults(articles);
 }
+
 
 // 🌐 Dynamic SearXNG search using searx.space live instance list
 async function fetchSearxng(query) {
@@ -77,20 +81,39 @@ async function fetchSearxng(query) {
         if (!data.results || data.results.length === 0) continue;
 
         const results = data.results.map(result => ({
-          title: result.title,
-          author: null,
-          date: null,
-          source: `Web (${new URL(instance).hostname})`,
-          link: result.url,
-          citations: []
+        title: result.title,
+        author: null,
+        date: null,
+        source: new URL(result.url).hostname, // Real site host
+        link: result.url,
+        engine: "SearXNG",
+        citations: []
         }));
 
-        displayResults(results);
-        return; // ✅ Stop after first working instance
-      } catch (err) {
-        console.warn(`Skipping instance: ${instance}`, err.message);
-        continue;
-      }
+
+        function displayResults(results) {
+  const container = document.getElementById("results");
+
+  results.forEach(article => {
+    const card = document.createElement("div");
+    card.className = "result";
+    card.innerHTML = `
+      <h3>${article.title}</h3>
+      <p><strong>Author:</strong> ${article.author || "Unknown"}</p>
+      <p><strong>Date:</strong> ${article.date || "Unknown"}</p>
+      <p><strong>Source:</strong> <a href="${article.link}" target="_blank">${article.source}</a></p>
+      <p><strong>Engine Source:</strong> ${article.engine}</p>
+      <a href="${article.link}" target="_blank">View Full Article</a>
+      ${article.citations.length ? `
+        <details><summary>Works Cited (${article.citations.length})</summary>
+        <ul>
+          ${article.citations.map(cite => `<li><a href="${cite}" target="_blank">${cite}</a></li>`).join("")}
+        </ul></details>` : ""}
+    `;
+    container.appendChild(card);
+  });
+}
+
     }
 
     // ❌ No working instance
