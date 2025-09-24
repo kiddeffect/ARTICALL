@@ -29,7 +29,6 @@ async function fetchCrossRef(query) {
   displayResults(articles);
 }
 
-
 // 🎓 OpenAlex academic search
 async function fetchOpenAlex(query) {
   const res = await fetch(`https://api.openalex.org/works?search=${encodeURIComponent(query)}`);
@@ -48,17 +47,14 @@ async function fetchOpenAlex(query) {
   displayResults(articles);
 }
 
-
 // 🌐 Dynamic SearXNG search using searx.space live instance list
 async function fetchSearxng(query) {
   const resultsContainer = document.getElementById("results");
 
   try {
-    // Step 1: Get live instance list from searx.space
     const res = await fetch("https://searx.space/data/instances.json");
     const instanceData = await res.json();
 
-    // Step 2: Filter valid instances
     const instances = Object.entries(instanceData.instances)
       .filter(([url, info]) =>
         info.online &&
@@ -69,7 +65,6 @@ async function fetchSearxng(query) {
       )
       .map(([url]) => url.replace(/\/$/, ""));
 
-    // Step 3: Try instances until one works
     for (let instance of instances) {
       try {
         const searchUrl = `${instance}/search?q=${encodeURIComponent(query)}&format=json`;
@@ -81,42 +76,23 @@ async function fetchSearxng(query) {
         if (!data.results || data.results.length === 0) continue;
 
         const results = data.results.map(result => ({
-        title: result.title,
-        author: null,
-        date: null,
-        source: new URL(result.url).hostname, // Real site host
-        link: result.url,
-        engine: "SearXNG",
-        citations: []
+          title: result.title,
+          author: null,
+          date: null,
+          source: new URL(result.url).hostname,
+          link: result.url,
+          engine: "SearXNG",
+          citations: []
         }));
 
-
-        function displayResults(results) {
-  const container = document.getElementById("results");
-
-  results.forEach(article => {
-    const card = document.createElement("div");
-    card.className = "result";
-    card.innerHTML = `
-      <h3>${article.title}</h3>
-      <p><strong>Author:</strong> ${article.author || "Unknown"}</p>
-      <p><strong>Date:</strong> ${article.date || "Unknown"}</p>
-      <p><strong>Source:</strong> <a href="${article.link}" target="_blank">${article.source}</a></p>
-      <p><strong>Engine Source:</strong> ${article.engine}</p>
-      <a href="${article.link}" target="_blank">View Full Article</a>
-      ${article.citations.length ? `
-        <details><summary>Works Cited (${article.citations.length})</summary>
-        <ul>
-          ${article.citations.map(cite => `<li><a href="${cite}" target="_blank">${cite}</a></li>`).join("")}
-        </ul></details>` : ""}
-    `;
-    container.appendChild(card);
-  });
-}
-
+        displayResults(results);
+        return; // ✅ Stop after successful instance
+      } catch (err) {
+        console.warn(`Skipping instance: ${instance}`, err.message);
+        continue;
+      }
     }
 
-    // ❌ No working instance
     resultsContainer.innerHTML += `<p style="color:red">⚠️ No working SearXNG instances found.</p>`;
 
   } catch (err) {
@@ -136,8 +112,9 @@ function displayResults(results) {
       <h3>${article.title}</h3>
       <p><strong>Author:</strong> ${article.author || "Unknown"}</p>
       <p><strong>Date:</strong> ${article.date || "Unknown"}</p>
-      <p><strong>Source:</strong> ${article.source}</p>
-      <a href="${article.link}" target="_blank">View Article</a>
+      <p><strong>Source:</strong> <a href="${article.link}" target="_blank">${article.source}</a></p>
+      <p><strong>Engine Source:</strong> ${article.engine}</p>
+      <a href="${article.link}" target="_blank">View Full Article</a>
       ${article.citations.length ? `
         <details><summary>Works Cited (${article.citations.length})</summary>
         <ul>
