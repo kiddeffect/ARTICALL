@@ -1,20 +1,19 @@
 async function search() {
   const query = document.getElementById("searchInput").value.trim();
-  if (!query) return; // Do nothing on empty query
+  if (!query) return;
 
   const useCrossRef = document.getElementById("crossref").checked;
   const useOpenAlex = document.getElementById("openalex").checked;
   const useSearx = document.getElementById("searxng").checked;
 
   const resultsContainer = document.getElementById("results");
-  resultsContainer.innerHTML = ""; // Clear previous results
+  resultsContainer.innerHTML = "";
 
   if (useCrossRef) await fetchCrossRef(query);
   if (useOpenAlex) await fetchOpenAlex(query);
   if (useSearx) await fetchSearxng(query);
 }
 
-// 📚 CrossRef scholarly search
 async function fetchCrossRef(query) {
   try {
     const res = await fetch(`https://api.crossref.org/works?query=${encodeURIComponent(query)}`);
@@ -36,7 +35,6 @@ async function fetchCrossRef(query) {
   }
 }
 
-// 🎓 OpenAlex academic search
 async function fetchOpenAlex(query) {
   try {
     const res = await fetch(`https://api.openalex.org/works?search=${encodeURIComponent(query)}`);
@@ -58,16 +56,13 @@ async function fetchOpenAlex(query) {
   }
 }
 
-// 🌐 Dynamic SearXNG search using searx.space live instance list
 async function fetchSearxng(query) {
   const resultsContainer = document.getElementById("results");
 
   try {
-    // Step 1: Get live instance list from searx.space
     const res = await fetch("https://searx.space/data/instances.json");
     const instanceData = await res.json();
 
-    // Step 2: Filter valid instances
     const instances = Object.entries(instanceData.instances)
       .filter(([url, info]) =>
         info.online &&
@@ -78,7 +73,6 @@ async function fetchSearxng(query) {
       )
       .map(([url]) => url.replace(/\/$/, ""));
 
-    // Step 3: Try instances until one works
     for (let instance of instances) {
       try {
         const searchUrl = `${instance}/search?q=${encodeURIComponent(query)}&format=json`;
@@ -93,22 +87,20 @@ async function fetchSearxng(query) {
           title: result.title || "No title",
           author: null,
           date: null,
-          source: new URL(result.url).hostname, // Real site host
+          source: new URL(result.url).hostname,
           link: result.url,
           engine: "SearXNG",
           citations: []
         }));
 
         displayResults(results);
-        return; // Success, stop trying instances
+        return;
 
       } catch (err) {
-        // Try next instance
         console.warn(`SearXNG instance failed: ${instance}`, err.message);
       }
     }
 
-    // No working instance found
     resultsContainer.innerHTML += `<p style="color:red">⚠️ No working SearXNG instances found.</p>`;
 
   } catch (err) {
@@ -117,7 +109,6 @@ async function fetchSearxng(query) {
   }
 }
 
-// 📋 Display results in the page
 function displayResults(results) {
   const container = document.getElementById("results");
 
@@ -141,16 +132,18 @@ function displayResults(results) {
   });
 }
 
-// 🔍 Enable Enter key to trigger search
-document.getElementById("searchInput").addEventListener("keydown", (e) => {
+// --- Keyboard: search on Enter ---
+document.getElementById("searchInput").addEventListener("keydown", e => {
   if (e.key === "Enter") {
     search();
   }
 });
 
-// 🌙 Dark mode toggle logic
-const themeToggle = document.getElementById('themeToggle');
+// --- Search button ---
+document.getElementById("searchBtn").addEventListener("click", search);
 
+// --- Dark mode toggle ---
+const themeToggle = document.getElementById('themeToggle');
 function setTheme(dark) {
   if (dark) {
     document.body.classList.add('dark');
@@ -162,17 +155,10 @@ function setTheme(dark) {
     localStorage.setItem('theme', 'light');
   }
 }
-
-// Initialize theme on page load
+// Load saved preference or default to light
 const savedTheme = localStorage.getItem('theme');
-if (savedTheme === 'dark') {
-  setTheme(true);
-} else {
-  setTheme(false);
-}
+setTheme(savedTheme === 'dark');
 
-// Toggle on button click
 themeToggle.addEventListener('click', () => {
-  const isDark = document.body.classList.contains('dark');
-  setTheme(!isDark);
+  setTheme(!document.body.classList.contains('dark'));
 });
