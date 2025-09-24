@@ -5,30 +5,103 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ARTICALL - Multi-Source Article Search</title>
   <link rel="stylesheet" href="styles.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f8f9fa;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    h1 {
+      margin-bottom: 0;
+    }
+
+    p {
+      margin-top: 5px;
+      color: #666;
+    }
+
+    #filters {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+
+    #filters label {
+      margin: 0 10px;
+      font-weight: 500;
+    }
+
+    #searchBox {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    input[type="text"] {
+      width: 60%;
+      padding: 10px;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+
+    #results {
+      width: 80%;
+      margin: auto;
+    }
+
+    .result {
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .result h3 {
+      margin-top: 0;
+    }
+
+    .result p {
+      margin: 6px 0;
+    }
+
+    details {
+      margin-top: 10px;
+    }
+  </style>
 </head>
 <body>
 
   <!-- 🧠 Page Title -->
-  <header style="text-align: center; margin-bottom: 20px;">
+  <header>
     <h1>ARTICALL</h1>
-    <p style="font-size: 1.2em; color: gray;">Multi-Source Article Search</p>
+    <p>Multi-Source Article Search</p>
   </header>
 
-  <!-- 🔍 Search Input -->
-  <div style="text-align: center; margin-bottom: 20px;">
-    <input type="text" id="searchInput" placeholder="Search articles..." style="width: 60%; padding: 10px; font-size: 16px;" />
-    <button onclick="search()" style="padding: 10px 20px; font-size: 16px;">Search</button>
-  </div>
-
-  <!-- ✅ Search Filters -->
-  <div style="text-align: center; margin-bottom: 20px;">
+  <!-- ✅ Filters above search -->
+  <div id="filters">
     <label><input type="checkbox" id="crossref" checked /> CrossRef</label>
     <label><input type="checkbox" id="openalex" checked /> OpenAlex</label>
     <label><input type="checkbox" id="searxng" checked /> SearXNG</label>
   </div>
 
+  <!-- 🔍 Search Box -->
+  <div id="searchBox">
+    <input type="text" id="searchInput" placeholder="Search articles..." />
+    <button onclick="search()">Search</button>
+  </div>
+
   <!-- 📄 Search Results -->
-  <div id="results" style="width: 80%; margin: auto;"></div>
+  <div id="results"></div>
 
   <!-- ⚙️ Script -->
   <script src="script.js"></script>
